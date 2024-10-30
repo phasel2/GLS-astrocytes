@@ -1,0 +1,131 @@
+#scRNA-seq of subdural cells data from PMID: 31061494
+
+library(Seurat)
+
+#laod count data
+tbl <- read.table(file = "GSM3687215_countTable_K23_enrichedSdm_wt.txt.gz", header = TRUE, sep = "")
+
+#Create and cluster seurat object
+so <- CreateSeuratObject(tbl)
+so
+so <- SCTransform(so, assay = "RNA", verbose = FALSE)
+so <- RunPCA(so, verbose = FALSE)
+so <- FindNeighbors(so, dims = 1:30)
+so <- FindClusters(so, verbose = FALSE) #, resolution = 0.5) #change res
+so <- RunUMAP(so, dims = 1:30)
+
+#load gray matter and GLS astrocytes from Fig 5
+so1 <- readRDS("path/to/Hasel.rds")
+
+#Add Metadata for merge
+so <- AddMetaData(object = so, metadata = 'Subdura', col.name = 'source_id')
+so1 <- AddMetaData(object = so1, metadata = 'Astrocytes', col.name = 'source_id')
+
+#Merge
+so2 <- merge(x = so, y = list(so1), add.cell.ids = c("Subdura", "Astrocytes"))
+VariableFeatures(so2) <- c(VariableFeatures(so), VariableFeatures(so1))
+
+#Recluster merged data
+so2 <- RunPCA(so2, verbose = FALSE)
+so2 <- FindNeighbors(so2, dims = 1:30)
+so2 <- FindClusters(so2, verbose = FALSE, resolution = 2)
+so2 <- RunUMAP(so2, dims = 1:30)
+
+#Define cell subtypes in merged data set
+so2 <- PrepSCTFindMarkers(so2)
+markers <- FindAllMarkers(so2, only.pos = T)
+
+#Rename cells
+so2 <- RenameIdents(object = so2, '20' = "B_cells")
+so2 <- RenameIdents(object = so2, '13' = "T_NKT_cells")
+so2 <- RenameIdents(object = so2, '24' = "cDC1")
+so2 <- RenameIdents(object = so2, '18' = "cDC2")
+so2 <- RenameIdents(object = so2, '21' = "Monocytes")
+
+so2 <- RenameIdents(object = so2, '15' = "Microglia")
+so2 <- RenameIdents(object = so2, '11' = "Microglia")
+so2 <- RenameIdents(object = so2, '5' = "Microglia")
+so2 <- RenameIdents(object = so2, '19' = "Microglia")
+so2 <- RenameIdents(object = so2, '1' = "Microglia")
+so2 <- RenameIdents(object = so2, '9' = "Microglia")
+so2 <- RenameIdents(object = so2, '12' = "Microglia")
+so2 <- RenameIdents(object = so2, '3' = "Microglia")
+so2 <- RenameIdents(object = so2, '10' = "Microglia")
+so2 <- RenameIdents(object = so2, '8' = "Microglia")
+so2 <- RenameIdents(object = so2, '27' = "Microglia")
+
+so2 <- RenameIdents(object = so2, '6' = "BAM")
+so2 <- RenameIdents(object = so2, '0' = "BAM")
+so2 <- RenameIdents(object = so2, '26' = "BAM")
+so2 <- RenameIdents(object = so2, '22' = "BAM")
+so2 <- RenameIdents(object = so2, '16' = "BAM")
+
+so2 <- RenameIdents(object = so2, '7' = "Upper_Layer_Astrocytes")
+so2 <- RenameIdents(object = so2, '2' = "Upper_Layer_Astrocytes")
+so2 <- RenameIdents(object = so2, '17' = "Upper_Layer_Astrocytes")
+so2 <- RenameIdents(object = so2, '4' = "Upper_Layer_Astrocytes")
+
+so2 <- RenameIdents(object = so2, '14' = "GLS_Astrocytes")
+
+so2 <- RenameIdents(object = so2, '25' = "Neutrophils")
+so2 <- RenameIdents(object = so2, '23' = "Unkown_proliferators")
+
+#Run CellChat on merged and annotaed data set
+so<-so2
+data.input = so@assays$SCT@data 
+data.input = so@assays$sketch$data
+meta = so@meta.data 
+cell.use = rownames(meta) 
+
+data.input = data.input[, cell.use]
+meta = meta[cell.use, ]
+meta$labels <- meta$seurat_clusters
+unique(meta$labels) # check the cell labels
+
+cellchat <- createCellChat(object = data.input, meta = meta, group.by = "labels")
+
+CellChatDB <- CellChatDB.mouse 
+showDatabaseCategory(CellChatDB)
+
+CellChatDB.use <- CellChatDB # simply use the default CellChatDB
+
+cellchat@DB <- CellChatDB.use
+
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+future::plan("multisession", workers = 4) # do parallel
+
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat)
+cellchat <- computeCommunProb(cellchat)
+
+cellchat <- filterCommunication(cellchat, min.cells = 10) #not run
+cellchat <- computeCommunProbPathway(cellchat)
+
+cellchat <- aggregateNet(cellchat)
+
+groupSize <- as.numeric(table(cellchat@idents))
+par(mfrow = c(1,2), xpd=TRUE)
+
+#Supp_Fig 2C 
+netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "Number of interactions")
+
+
+mat <- cellchat@net$weight
+par(mfrow = c(3,4), xpd=TRUE)
+for (i in 1:nrow(mat)) {
+  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
+  mat2[i, ] <- mat[i, ]
+  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
+}
+
+#Supp_Fig 2D
+
+pathways.show <- c("BMP") 
+par(mfrow=c(1,1))
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord")
+
+#Supp_Fig 2E
+plotGeneExpression(cellchat, signaling = "BMP")
+
+#Supp_Fig 2F
+netVisual_chord_gene(cellchat, sources.use = 3, targets.use = c(1:11), lab.cex = 0.5,legend.pos.y = 30)
