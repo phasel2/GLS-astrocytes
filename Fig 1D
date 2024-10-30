@@ -31,7 +31,7 @@ Matson_et_al	4525	107	2.36	Spinal_Cord	GSE172167
 Endo_et_al	2021	0	0	Striatum	GSE198027
 
 #Load data frame
-Myoc_table <- read_csv("~Documents/Myoc_meta/Myoc_collate_for_table_Dec21.csv")
+Myoc_table <- read_csv("path/to/dataframe.csv")
 #Create table
 Myoc_table %>%
   dplyr::select(Source,Region,Astrocytes, `Myoc+`,`%Myoc+`) %>%
