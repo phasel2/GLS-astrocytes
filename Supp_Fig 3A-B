@@ -1,0 +1,28 @@
+library(pheatmap)
+library(viridis)
+library(ggmsa)
+
+#FASTA sequences are downloaded from ncbi
+
+#Supp_Fig 3A
+protein_sequences <- file.path("path/to/sample.fasta")
+ggmsa(protein_sequences, 256, 515, seq_name = TRUE, char_width = 0.5) & geom_msaBar()
+ggmsa(protein_sequences, 256, 515, seq_name = TRUE, font = NULL, color = "Chemistry_AA") 
+
+
+#Supp_Fig 3B
+#Create data frame as below
+	Danio_rerio	Mus_musculus	Rattus_norvegicus	Sus_scrofa	Homo_sapiens	Pan_troglodytes
+Danio_rerio	100	46.76	46.53	49.1	48.32	47.65
+Mus_musculus	46.76	100	93.05	79.35	81.84	81.22
+Rattus_norvegicus	46.53	93.05	100	79.51	81.6	80.98
+Sus_scrofa	49.1	79.35	79.51	100	82	81.8
+Homo_sapiens	48.32	81.84	81.6	82	100	98.78
+Pan_troglodytes	47.65	81.22	80.98	81.8	98.78	100
+
+#Read in data
+data1 <- read.csv(file.path("path/to/corr_mat.csv"))
+rownames(data1)<- data1[,1]
+data1 = select(data1, -1)
+#Create heatmap
+pheatmap::pheatmap(data1, display_numbers = TRUE, color = viridis(10))
