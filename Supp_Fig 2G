@@ -1,0 +1,45 @@
+#Reanalysis of BMP6 treated primary astrocytes from Caldwell et al [PMID: 36042312]
+
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+
+res <- read_csv("path/to/BMP6_astrocytes.csv")
+
+cols <- c("up" = "#ffad73", "down" = "#26b3ff", "ns" = "grey") 
+sizes <- c("up" = 5, "down" = 5, "ns" = 3) 
+alphas <- c("up" = 1, "down" = 1, "ns" = 0.5)
+
+res <- res %>%
+  mutate(gene_type = case_when(log2f >= 0.25 & p_val_adj <= 0.05 ~ "up",
+                               log2f <= -0.25 & p_val_adj <= 0.05 ~ "down",
+                               TRUE ~ "ns"))
+sig_il_genes <- res %>%
+  filter(gene %in% c("Myoc", "Id3", "Serpinf1", "Gfap", "Id1", "Fxyd6", "Aqp4"))
+
+
+ggplot(data = res,
+       aes(x = log2f,
+           y = -log10(p_val_adj))) + 
+  geom_point(aes(colour = gene_type), 
+             alpha = 1, 
+             shape = 16,
+             size = 2) + 
+  geom_point(data = sig_il_genes,
+             shape = 21,
+             size = 3, 
+             fill = "firebrick", 
+             colour = "black") + 
+  
+  geom_hline(yintercept = -log10(0.05),
+             linetype = "dashed") + 
+  geom_vline(xintercept = c(-0.25, 0.25),
+             linetype = "dashed") +
+  geom_label_repel(data = sig_il_genes, 
+                   aes(label = gene),
+                   force = 2,
+                   nudge_y = 1) +
+  scale_colour_manual(values = cols) + 
+  scale_x_continuous(breaks = c(seq(-10, 10, 2)),     
+                     limits = c(-2, 12)) 
+
