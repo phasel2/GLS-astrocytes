@@ -1,0 +1,47 @@
+library(dplyr)
+library(ggplot2)
+library(limma)
+library(muscat)
+library(purrr)
+library(Seurat)
+library(SingleCellExperiment)
+
+#Load seurat object from Hasel et al 2021 (Hasel_et_al,	GSE148611,	PMID:34413515)
+so <- readRDS("path/to/Hasel.rds")
+
+#Subset control cells
+so <- so[,so$group_id == "CNT"]
+
+#Normalize and cluster
+so <- SCTransform(so, assay = "RNA", verbose = FALSE, vars.to.regress = "sex_id")
+so <- RunPCA(so, verbose = FALSE)
+so <- FindNeighbors(so, dims = 1:30)
+so <- FindClusters(so, verbose = FALSE)
+so <- RunUMAP(so, dims = 1:30)
+
+#Subset WM, GM and GLS astrocytes
+so <- subset(so, idents = c(1,4,5, 7,14))
+
+#Rename WM, GM and GLS astrocytes
+so <- RenameIdents(so, `1` = "GM1_Mfge8")
+so <- RenameIdents(so, `4` = "GM2_Igfbp2")
+so <- RenameIdents(so, `5` = "GM3_Nnat")
+so <- RenameIdents(so, `7` = "WM_Thbs4")
+so <- RenameIdents(so, `14` = "GLS_Myoc")
+
+so$seurat_clusters<- so@active.ident
+
+#Run muscat [for muscat see PMID: 33257685]
+
+sce <- as.SingleCellExperiment(so, assay = "RNA")
+sce <- prepSCE(sce, "seurat_clusters", "sample_id", "group_id")
+nk <- length(kids <- levels(sce$cluster_id))
+ns <- length(sids <- levels(sce$sample_id))
+names(kids) <- kids; names(sids) <- sids
+t(table(sce$cluster_id, sce$sample_id))
+pb <- aggregateData(sce,
+                    assay = "counts", fun = "sum",
+                    by = c("cluster_id", "sample_id"))
+assayNames(pb)
+t(head(assay(pb)))
+(pb_mds <- pbMDS(pb))
