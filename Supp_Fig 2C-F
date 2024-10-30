@@ -1,8 +1,8 @@
-#scRNA-seq of subdural cells data from PMID: 31061494
+#scRNA-seq of subdural cells. Data from PMID: 31061494.
 
 library(Seurat)
 
-#laod count data
+#load count data
 tbl <- read.table(file = "GSM3687215_countTable_K23_enrichedSdm_wt.txt.gz", header = TRUE, sep = "")
 
 #Create and cluster seurat object
