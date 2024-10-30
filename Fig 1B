@@ -1,0 +1,113 @@
+#Reanalysis of Ximerakis et al. (PMID: 31551601)
+
+library(Seurat)
+library(scCustomize)
+library(ggplot2)
+
+#Load directory with sample files
+Young<-Read_GEO_Delim(data_dir = "path/to/Young/",sample_names = c("Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8"), file_suffix = ".txt.gz")
+Old <-Read_GEO_Delim(data_dir = "/path/to/Old/",sample_names = c("O1","O2","O3","O4","O5","O6","O7","O8"), file_suffix = ".txt.gz")
+
+#Create SO for each sample
+Y1<-CreateSeuratObject(Young$Y1)
+Y2<-CreateSeuratObject(Young$Y2)
+Y3<-CreateSeuratObject(Young$Y3)
+Y4<-CreateSeuratObject(Young$Y4)
+Y5<-CreateSeuratObject(Young$Y5)
+Y6<-CreateSeuratObject(Young$Y6)
+Y7<-CreateSeuratObject(Young$Y7)
+Y8<-CreateSeuratObject(Young$Y8)
+
+O1<-CreateSeuratObject(Old$O1)
+O2<-CreateSeuratObject(Old$O2)
+O3<-CreateSeuratObject(Old$O3)
+O4<-CreateSeuratObject(Old$O4)
+O5<-CreateSeuratObject(Old$O5)
+O6<-CreateSeuratObject(Old$O6)
+O7<-CreateSeuratObject(Old$O7)
+O8<-CreateSeuratObject(Old$O8)
+
+#Add group metadata
+Y1 <- AddMetaData(object = Y1, metadata = 'Young', col.name = 'group_id')
+Y2 <- AddMetaData(object = Y2, metadata = 'Young', col.name = 'group_id')
+Y3 <- AddMetaData(object = Y3, metadata = 'Young', col.name = 'group_id')
+Y4 <- AddMetaData(object = Y4, metadata = 'Young', col.name = 'group_id')
+Y5 <- AddMetaData(object = Y5, metadata = 'Young', col.name = 'group_id')
+Y6 <- AddMetaData(object = Y6, metadata = 'Young', col.name = 'group_id')
+Y7 <- AddMetaData(object = Y7, metadata = 'Young', col.name = 'group_id')
+Y8 <- AddMetaData(object = Y8, metadata = 'Young', col.name = 'group_id')
+O1 <- AddMetaData(object = O1, metadata = 'Old', col.name = 'group_id')
+O2 <- AddMetaData(object = O2, metadata = 'Old', col.name = 'group_id')
+O3 <- AddMetaData(object = O3, metadata = 'Old', col.name = 'group_id')
+O4 <- AddMetaData(object = O4, metadata = 'Old', col.name = 'group_id')
+O5 <- AddMetaData(object = O5, metadata = 'Old', col.name = 'group_id')
+O6 <- AddMetaData(object = O6, metadata = 'Old', col.name = 'group_id')
+O7 <- AddMetaData(object = O7, metadata = 'Old', col.name = 'group_id')
+O8 <- AddMetaData(object = O8, metadata = 'Old', col.name = 'group_id')
+
+#Add sample metadata
+
+Y1 <- AddMetaData(object = Y1, metadata = 'Y1', col.name = 'sample_id')
+Y2 <- AddMetaData(object = Y2, metadata = 'Y2', col.name = 'sample_id')
+Y3 <- AddMetaData(object = Y3, metadata = 'Y3', col.name = 'sample_id')
+Y4 <- AddMetaData(object = Y4, metadata = 'Y4', col.name = 'sample_id')
+Y5 <- AddMetaData(object = Y5, metadata = 'Y5', col.name = 'sample_id')
+Y6 <- AddMetaData(object = Y6, metadata = 'Y6', col.name = 'sample_id')
+Y7 <- AddMetaData(object = Y7, metadata = 'Y7', col.name = 'sample_id')
+Y8 <- AddMetaData(object = Y8, metadata = 'Y8', col.name = 'sample_id')
+O1 <- AddMetaData(object = O1, metadata = 'O1', col.name = 'sample_id')
+O2 <- AddMetaData(object = O2, metadata = 'O2', col.name = 'sample_id')
+O3 <- AddMetaData(object = O3, metadata = 'O3', col.name = 'sample_id')
+O4 <- AddMetaData(object = O4, metadata = 'O4', col.name = 'sample_id')
+O5 <- AddMetaData(object = O5, metadata = 'O5', col.name = 'sample_id')
+O6 <- AddMetaData(object = O6, metadata = 'O6', col.name = 'sample_id')
+O7 <- AddMetaData(object = O7, metadata = 'O7', col.name = 'sample_id')
+O8 <- AddMetaData(object = O8, metadata = 'O8', col.name = 'sample_id')
+
+#Run SCTransform for each sample
+
+Y1 <- SCTransform(Y1, assay = "RNA", verbose = FALSE)
+Y2 <- SCTransform(Y2, assay = "RNA", verbose = FALSE)
+Y3 <- SCTransform(Y3, assay = "RNA", verbose = FALSE)
+Y4 <- SCTransform(Y4, assay = "RNA", verbose = FALSE)
+Y5 <- SCTransform(Y5, assay = "RNA", verbose = FALSE)
+Y6 <- SCTransform(Y6, assay = "RNA", verbose = FALSE)
+Y7 <- SCTransform(Y7, assay = "RNA", verbose = FALSE)
+Y8 <- SCTransform(Y8, assay = "RNA", verbose = FALSE)
+O1 <- SCTransform(O1, assay = "RNA", verbose = FALSE)
+O2 <- SCTransform(O2, assay = "RNA", verbose = FALSE)
+O3 <- SCTransform(O3, assay = "RNA", verbose = FALSE)
+O4 <- SCTransform(O4, assay = "RNA", verbose = FALSE)
+O5 <- SCTransform(O5, assay = "RNA", verbose = FALSE)
+O6 <- SCTransform(O6, assay = "RNA", verbose = FALSE)
+O7 <- SCTransform(O7, assay = "RNA", verbose = FALSE)
+O8 <- SCTransform(O8, assay = "RNA", verbose = FALSE)
+
+#Merge all SOs into one SO and add a cell tag
+so <- merge(x = Y1, y = list(Y2, Y3, Y4, Y5, Y6, Y7, Y8, O1, O2, O3, O4,O5,O6,O7,O8), add.cell.ids = c("Y1","Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "O1", "O2", "O3", "O4","O5","O6","O7","O8"))
+
+#Make sure the default assays now SCT and no RNA
+DefaultAssay(so) <- "SCT"
+
+#Use SCT-calculated variable features from all samples
+VariableFeatures(so) <- c(VariableFeatures(Y1), VariableFeatures(Y2), VariableFeatures(Y3),VariableFeatures(Y4),VariableFeatures(Y5),VariableFeatures(Y6),VariableFeatures(Y7),VariableFeatures(Y8), VariableFeatures(O1),VariableFeatures(O2),VariableFeatures(O3),VariableFeatures(O4),VariableFeatures(O5),VariableFeatures(O6),VariableFeatures(O7),VariableFeatures(O8))
+
+
+#Cluster
+so <- RunPCA(so, verbose = FALSE)
+so <- FindNeighbors(so, dims = 1:30)
+so <- FindClusters(so, verbose = FALSE, res = 0.8)
+so <- RunUMAP(so, dims = 1:30)
+
+#Set cell identities
+so <- RenameIdents(so,`0`= "Oligo/OPC", `4`= "Oligo/OPC", `7`= "Oligo/OPC", `8`= "Oligo/OPC", `9`= "Oligo/OPC", `11`= "Oligo/OPC", `17`= "Oligo/OPC", `24`= "Oligo/OPC", `28`= "Oligo/OPC")
+so <- RenameIdents(so,`1`= "Microglia",`19`= "Microglia",`25`= "Microglia")
+so <- RenameIdents(so,`2`= "Astrocyte",`5`= "Astrocyte",`10`= "Astrocyte")
+so <- RenameIdents(so,`3`= "Neuron", `12`= "Neuron", `13`= "Neuron", `14`= "Neuron", `18`= "Neuron", `20`= "Neuron", `23`= "Neuron", `26`= "Neuron")
+so <- RenameIdents(so,`6`= "Endothelial",`15`= "Endothelial",`16`= "Endothelial")
+so <- RenameIdents(so,`22`= "Pericyte")
+so <- RenameIdents(so,`27`= "Choroid")
+so <- RenameIdents(so,`21`= "Unknown")
+
+#Dotplot
+DotPlot(so, features = "Myoc")&theme(aspect.ratio = 1)
