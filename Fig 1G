@@ -1,0 +1,87 @@
+library(CIDER)
+library(Seurat)
+library(ggplot2)
+library(viridis)
+
+#Load seurat object from Hasel et al 2021 (Hasel_et_al,	GSE148611,	PMID:34413515)
+
+so <- readRDS("path/to/Hasel.rds")
+
+#Subset control cells
+so <- so[,so$group_id == "CNT"]
+
+#Subset GM, WM and GLS clusters
+
+so <- subset(so, idents = c(0,4,1, 17,8))
+
+#Rename GM, WM and GLS clusters
+so <- RenameIdents(so, `0` = "GM")
+so <- RenameIdents(so, `4` = "GM")
+so <- RenameIdents(so, `1` = "GM")
+so <- RenameIdents(so, `8` = "WM")
+so <- RenameIdents(so, `17` = "GLS")
+
+#Prep for CIDER-based correlation analysis [for CIDER see PMID: 34903266]
+seu<-so
+seu$group_id<- "onebatch"
+
+#Create CIDER correlation function
+
+mtx <- function (seu_list, verbose = TRUE, tmp.initial.clusters = "seurat_clusters", 
+                 method = "trend", additional.variate = NULL, downsampling.size = 35, 
+                 downsampling.include = TRUE, downsampling.replace = TRUE) 
+{
+  dist_coef <- list()
+  if (verbose == TRUE) {
+    pb <- txtProgressBar(min = 0, max = length(seu_list), 
+                         style = 3)
+    k <- 1
+  }
+  for (seu_itor in seq_len(length(seu_list))) {
+    df_info <- data.frame(label = seu_list[[seu_itor]]$seurat_clusters, 
+                          batch = seu_list[[seu_itor]]$group_id)
+    idx <- downsampling(metadata = df_info, n.size = downsampling.size, 
+                        include = downsampling.include, replace = downsampling.replace)
+    idx <- sort(idx)
+    to_add <- idx[duplicated(idx)]
+    idx <- idx[!duplicated(idx)]
+    matrix <- as.matrix(seu_list[[seu_itor]]@assays$RNA@counts[, 
+                                                                   idx])
+    if (length(to_add) > 0) {
+      matrix2 <- data.frame(seu_list[[seu_itor]]@RNA$RNA@counts[, 
+                                                                       to_add])
+      colnames(matrix2) <- paste0(colnames(matrix2), seq_len(ncol(matrix2)))
+      matrix2 <- as.matrix(matrix2)
+      matrix <- cbind(matrix, matrix2)
+      rm(matrix2)
+    }
+    if (length(unique(df_info$label[idx])) > 2) {
+      dist_coef[[seu_itor]] <- calculateDistMatOneModel(matrix = matrix, 
+                                                        metadata = df_info[c(idx, to_add), ], verbose = verbose, 
+                                                        method = method, additional.variate = additional.variate)
+    }
+    if (verbose == TRUE) {
+      setTxtProgressBar(pb, k)
+      k <- k + 1
+    }
+  }
+  if (verbose == TRUE) {
+    close(pb)
+  }
+  return(dist_coef)
+}
+
+#Run CIDER
+dist <- mtx(seu_list = list(seu), tmp.initial.clusters = "seurat_clusters")
+
+#Create graph
+
+thm <- theme(aspect.ratio = 1)
+
+for(i in which(sapply(dist, function(x) return(!is.null(x))))){
+  tmp <- dist[[i]] + t(dist[[i]])
+  diag(tmp) <- 1
+  pheatmap::pheatmap(tmp, display_numbers = F, color = viridis(100))
+} & thm
+
+
