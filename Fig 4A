@@ -1,0 +1,40 @@
+library(gt)
+library(gtExtras)
+library(svglite)
+librry(dplyr)
+library(Seurat)
+
+#load seurat objects
+so<-readRDS(file.path("path/to/seurat_object","seurat_object.rds"))
+
+#Identify MYOC+ astrocytes
+so <- SetIdent(so, cells = WhichCells(so, expression = MYOC > 0), value = "MYOC+")
+#Exract cell numbers
+table(so@meta.data$group_id, so@active.ident)
+
+#Create table
+#Takes as input the following data frame
+
+Source	Region	Astocytes	Myoc+	%Myoc+
+Sadick_et_al	Cortex	41071	67	0.163132137
+Siletti_et_al	Cerebral_Cortex	40532	17	0.041942169
+Siletti_et_al	Pons	10539	15	0.142328494
+Siletti_et_al	Midbrain	13278	13	0.097906311
+Siletti_et_al	Hypothalamus	5366	5	0.093179277
+Siletti_et_al	Cerebellum	6578	17	0.258437215
+Siletti_et_al	Spinal_Cord	2435	5	0.205338809
+Siletti_et_al	Hippocampal_Formation	27778	18	0.064799482
+Siletti_et_al	Myelencephalon	5497	14	0.254684373
+Siletti_et_al	Thalamic_Complex	13648	5	0.036635404
+Siletti_et_al	Cerebral_Nuclei	29374	32	0.108939879
+
+#Load data frame
+Myoc_table <- read_csv("path/to/dataframe.csv")
+
+#Create table
+Myoc_table %>%
+  dplyr::select(Source,Region,Astrocytes, `Myoc+`,`%Myoc+`) %>%
+  gt() %>%
+  gt_color_rows(Astrocytes:`Myoc+`, palette = "ggsci::blue_material", reverse=F) %>%
+  gt_plt_bar(column = `%Myoc+`, scaled = T, fill = "blue", background = "lightblue", keep_column = T) %>%
+  cols_align("center", contains("scale")) 
