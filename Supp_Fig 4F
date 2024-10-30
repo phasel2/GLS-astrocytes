@@ -1,0 +1,29 @@
+library(tidyverse)
+library(ggplot2)
+
+#Per gene spatial transcriptomics quantification of the Macaque brain is available from PMID: 37442136 and can be formatted as below
+
+	Area	Value	Layer	Gene
+1	V1-l1	0.554795	L1	Gfap
+2	V2-l1	0.514932	L1	Gfap
+3	V3A-l1	0.491925	L1	Gfap
+4	V4v-l1	0.542421	L1	Gfap
+5	V4-l1	0.506526	L1	Gfap
+6	V4t-l1	0.562855	L1	Gfap
+7	V3d-l1	0.498865	L1	Gfap
+8	V3v-l1	0.533688	L1	Gfap
+9	V1-l2	0.40942	L2	Gfap
+10	V2-l2	0.392753	L2	Gfap
+11	V3A-l2	0.395104	L2	Gfap
+[...]
+
+df <- read_csv("Macaque_spatial_transcriptomics.csv")
+df<-  mutate(df, Layer = case_when(str_detect(Area, "l1$") ~ 'L1',
+                           str_detect(Area, "l2$") ~ 'L2',
+                           str_detect(Area, "l3$") ~ 'L3',
+                           str_detect(Area, "l4$") ~ 'L4',
+                           str_detect(Area, "l5$") ~ 'L5',
+                           str_detect(Area, "l6$") ~ 'L6'))
+
+#Create boxplot
+ggplot(df, aes(x=Value, y=Layer, fill=Gene)) +geom_boxplot(outlier.shape = NA)  &  scale_y_discrete(limits=c("L6", "L5", "L4", "L3", "L2", "L1"))&theme_bw()& scale_fill_brewer(palette = "Set2")
