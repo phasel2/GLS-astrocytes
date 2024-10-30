@@ -1,0 +1,25 @@
+#Create circular heatmaps to visualize % of gene expressed within a cluster
+library(Seurat)
+library(circlize)
+library(ComplexHeatmap)
+
+#load seurat objects from Fig 1C
+so<-readRDS(file.path("path/to/seurat_object","seurat_object.rds"))
+
+#Identify Myoc+ astrocytes
+so <- SetIdent(so, cells = WhichCells(so, expression = Thbs4 > 0), value = "Thbs4+")
+
+#Identify genes enriched in Myoc+ astrocytes and their %expression
+marker <- FindMarkers(so, ident.1 = "Thbs4+")
+
+#Load data frame with genes, pct.1 and pct.2 from the FindMarkers output
+mat <- read.csv("/path/to/percentage_Thbs4.csv", row.names=1)
+
+col_fun1 = colorRamp2(c(0,25,50,75, 100), c("#440154","#3b528b","#21918c","#5ec962", "#fde725"))
+
+circos.heatmap(mat, col = col_fun1, dend.side = "inside", 
+               rownames.side = "outside", clustering.method = "single")
+
+lgd = Legend(title = "@expressed", col_fun = col_fun1)
+grid.draw(lgd)
+circos.clear()
