@@ -1,0 +1,40 @@
+library(ggplot2)
+
+#read in data frame in the following format:
+
+Age	Age_Condition	Animal	Myoc_pos	Area	Condition	Devel
+E17	E17	CX_G_17	0	Cortex	Control	Early
+E17	E17	CX_H_17	0	Cortex	Control	Early
+E17	E17	CX_I_17	0	Cortex	Control	Early
+E17	E17	CX_J_17	0	Cortex	Control	Early
+P4	P4	CX_K_4	2.631578948	Cortex	Control	Early
+P4	P4	CX_L_4	6.25	Cortex	Control	Early
+P4	P4	CX_M_4	4.827968924	Cortex	Control	Early
+P8	P8	CX_N_8	95.77777778	Cortex	Control	Late
+P8	P8	CX_O_8	89.62264151	Cortex	Control	Late
+P8	P8	CX_P_8	89.31818182	Cortex	Control	Late
+P12	P12	CX_Q_12	96.91692467	Cortex	Control	Late
+P12	P12	CX_R_12	97.91666667	Cortex	Control	Late
+P12	P12	CX_S_12	94.99861073	Cortex	Control	Late
+P60	P60	CX_D_60	99.30555556	Cortex	Control	Late
+P60	P60	CX_E_60	100	Cortex	Control	Late
+P60	P60	CX_F_60	98.14814815	Cortex	Control	Late
+P60	P60_LPS	CX_A_60	96.99476151	Cortex	LPS	Late
+P60	P60_LPS	CX_B_60	97.87234043	Cortex	LPS	Late
+P60	P60_LPS	CX_C_60	97.03947368	Cortex	LPS	Late
+P60	P60_Spinal_Cord	SC_A_60	100	Spinal_Cord	Control	Late
+P60	P60_Spinal_Cord	SC_B_60	99.375	Spinal_Cord	Control	Late
+P60	P60_Spinal_Cord	SC_C_60	100	Spinal_Cord	Control	Late
+
+mat <- read.csv(file.path("path/to/collated_myoc_development.csv"))
+
+#Create boxplot
+
+ggplot(mat, aes(y=Myoc_pos,x=factor(Age_Condition,level=c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord")), fill =Age_Condition, )) +
+  geom_boxplot(linewidth =0.2)+
+  scale_fill_brewer(palette="RdBu",limits = c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord"))+
+  theme(legend.key.size = unit(2.5, "lines"))+
+  ylab("%Myoc+/Slc1a3+ GLS astrocytes")+
+  scale_x_discrete(labels=c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord"))
+
+
