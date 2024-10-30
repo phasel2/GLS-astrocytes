@@ -30,7 +30,7 @@ mat <- read.csv(file.path("path/to/collated_myoc_development.csv"))
 
 #Create boxplot
 
-ggplot(mat, aes(y=Myoc_pos,x=factor(Age_Condition,level=c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord")), fill =Age_Condition, )) +
+ggplot(mat, aes(y=Myoc_pos,x=factor(Age_Condition,level=c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord")), fill =Age_Condition)) +
   geom_boxplot(linewidth =0.2)+
   scale_fill_brewer(palette="RdBu",limits = c("E17", "P4", "P8", "P12", "P60", "P60_LPS", "P60_Spinal_Cord"))+
   theme(legend.key.size = unit(2.5, "lines"))+
