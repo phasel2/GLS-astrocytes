@@ -1,0 +1,44 @@
+library(ggplot2)
+library(tidyr)
+library(BayesSpace) 
+library(SingleCellExperiment) 
+library(Seurat)
+library(viridis)
+
+#Load Visium data
+so<-Load10X_Spatial(data.dir = "path/to/spaceranger/outs/")
+
+#Normalize and cluster
+so <- SCTransform(so, assay = "Spatial", verbose = FALSE)
+so <- RunPCA(so, verbose = FALSE)
+so <- FindNeighbors(so, dims = 1:30)
+so <- FindClusters(so, verbose = FALSE) 
+so <- RunUMAP(so, dims = 1:30)
+
+#Visualize clusters on brain section
+SpatialDimPlot(so)
+
+#Highlight specific cluster in brain section, here Cluster 7 (Myoc+ GLS cluster)
+SpatialDimPlot(so,cells.highlight = WhichCells(so, idents = 7))
+
+#Run BayesSpace
+sce <- readVisium("path/to/spaceranger/outs/")
+sce <- spatialPreprocess(sce, platform="ST", n.PCs=7, n.HVGs=2000, log.normalize=FALSE)
+sce <- qTune(sce, qs=seq(2, 10), platform="ST", d=7)
+qPlot(sce)
+sce <- spatialCluster(sce, q=4, platform="ST", d=7,
+                           init.method="mclust", model="t", gamma=2,
+                           nrep=1000, burn.in=100,
+                           save.chain=TRUE)
+sce.enhanced <- spatialEnhance(sce, q=4, platform="ST", d=7,
+                                    model="t", gamma=2,
+                                    jitter_prior=0.3, jitter_scale=3.5,
+                                    nrep=1000, burn.in=100,
+                                    save.chain=TRUE)
+
+all_genes = rownames(sce)
+sce.enhanced <- enhanceFeatures(sce.enhanced, sce, nrounds=0, feature_names = all_genes)
+
+#Highligh Myoc in Visium section
+featurePlot(sce.enhanced, feature = "Myoc") + scale_fill_viridis_c(option = "plasma")
+
