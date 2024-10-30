@@ -1,0 +1,149 @@
+library(Seurat)
+library(harmony)
+library(cowplot)
+library(ggplot2)
+library(harmony)
+library(CATALYST)
+
+#Load and annotate seurat objects
+#Wheeler
+so <- AddMetaData(object = so, metadata = 'DropSeq', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Brain_and_Spinal_cord', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Wheeler_et_al', col.name = 'project_id')
+
+so@assays$RNA <- so@assays$originalexp
+
+saveRDS(so, file.path("/path/to/seurat_object", "Wheeler.rds"))
+
+#Habib
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Hippocampus', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Habib_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Habib.rds"))
+
+#Hasel
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Cortex', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Hasel_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Hasel.rds"))
+
+#Endo
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Cortex', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Endo_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Endo_Cortex.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Hippocampus', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Endo_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/Users/haselp01/Documents/Myoc_meta/Integration", "Endo_Hippocampus.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Striatum', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Endo_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Endo_Striatum.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Cortex', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Endo_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Endo_WT_APP.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Spinal_Cord', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'MacLean_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "MacLean.rds"))
+
+
+so <- AddMetaData(object = so, metadata = 'DropSeq', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Spinal_Cord', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Mifflin_et_al', col.name = 'project_id')
+
+Mifflin@assays$RNA <- Mifflin@assays$originalexp
+
+saveRDS(so, file.path("/path/to/seurat_object", "Mifflin.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Spinal_Cord', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Milich_et_al', col.name = 'project_id')
+
+so@meta.data$sample_id <- so@meta.data$time
+so@meta.data$group_id <-so@meta.data$time
+
+saveRDS(so, file.path("/path/to/seurat_object", "Milich.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Cortex', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Zamboni_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Zamboni.rds"))
+
+so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
+so <- AddMetaData(object = so, metadata = 'Cortex', col.name = 'region_id')
+so <- AddMetaData(object = so, metadata = 'Zhou_et_al', col.name = 'project_id')
+
+saveRDS(so, file.path("/path/to/seurat_object", "Zhou.rds"))
+
+#Load annotated seurat objects for processing
+
+Endo_Cortex <- readRDS(file.path("/path/to/seurat_object", "Endo_Cortex.rds"))
+Endo_Hippocampus <- readRDS(file.path("/path/to/seurat_object", "Endo_Hippocampus.rds"))
+Endo_Striatum <- readRDS(file.path("/path/to/seurat_object", "Endo_Striatum.rds"))
+Endo_WT_APP <- readRDS(file.path("/path/to/seurat_object", "Endo_WT_APP.rds"))
+Habib <- readRDS(file.path("/path/to/seurat_object", "Habib.rds"))
+Hasel <- readRDS(file.path("/path/to/seurat_object", "Hasel.rds"))
+MacLean <- readRDS(file.path("/path/to/seurat_object", "MacLean.rds"))
+Mifflin <- readRDS(file.path("/path/to/seurat_object", "Mifflin.rds"))
+Milich <- readRDS(file.path("/path/to/seurat_object", "Milich.rds"))
+Wheeler <- readRDS(file.path("/path/to/seurat_object", "Wheeler.rds"))
+Zamboni <- readRDS(file.path("/path/to/seurat_object", "Zamboni.rds"))
+Zhou <- readRDS(file.path("/path/to/seurat_object", "Zhou.rds"))
+
+
+Endo_Cortex <- SCTransform(Endo_Cortex, assay = "RNA", verbose = FALSE)
+Endo_Hippocampus <- SCTransform(Endo_Hippocampus, assay = "RNA", verbose = FALSE)
+Endo_Striatum <- SCTransform(Endo_Striatum, assay = "RNA", verbose = FALSE)
+Endo_WT_APP <- SCTransform(Endo_WT_APP, assay = "RNA", verbose = FALSE)
+Habib <- SCTransform(Habib, assay = "RNA", verbose = FALSE)
+Hasel <- SCTransform(Hasel, assay = "RNA", verbose = FALSE)
+MacLean <- SCTransform(MacLean, assay = "RNA", verbose = FALSE)
+Mifflin <- SCTransform(Mifflin, assay = "RNA", verbose = FALSE)
+Milich <- SCTransform(Milich, assay = "RNA", verbose = FALSE)
+Wheeler <- SCTransform(Wheeler, assay = "RNA", verbose = FALSE)
+Zamboni <- SCTransform(Zamboni, assay = "RNA", verbose = FALSE)
+Zhou <- SCTransform(Zhou, assay = "RNA", verbose = FALSE)
+
+#Merge all seurat objects
+options(future.globals.maxSize = 2048 * 1024 ^ 4)
+so <- merge(x = Endo_Cortex, y = list(Endo_Hippocampus, Endo_Striatum, Endo_WT_APP, Habib, MacLean,Mifflin,Milich,Wheeler,Zamboni,Zhou, Hasel), add.cell.ids = c("Endo_Cortex", "Endo_Hippocampus", "Endo_Striatum", "Endo_WT_APP", "Habib", "MacLean","Mifflin","Milich","Wheeler", "Zamboni","Zhou","Hasel))
+
+VariableFeatures(so) <- c(VariableFeatures(Endo_Cortex), VariableFeatures(Endo_Hippocampus), VariableFeatures(Endo_Striatum),VariableFeatures(Endo_WT_APP),VariableFeatures(Habib),VariableFeatures(Hasel),VariableFeatures(MacLean),VariableFeatures(Mifflin),VariableFeatures(Milich),VariableFeatures(Wheeler),VariableFeatures(Zamboni),VariableFeatures(Zhou))
+
+#Integrate all objects
+so <- so %>% 
+  RunHarmony("project_id", plot_convergence = TRUE, assay.use = "SCT")
+
+options(repr.plot.height = 5, repr.plot.width = 12)
+p1 <- DimPlot(object = so, reduction = "harmony", pt.size = .1, group.by = "sample_id")
+p2 <- VlnPlot(object = so, features = "harmony_1", group.by = "sample_id", pt.size = .1)
+plot_grid(p1,p2)
+
+so <- so %>% 
+  RunUMAP(reduction = "harmony", dims = 1:20) %>% 
+  FindNeighbors(reduction = "harmony", dims = 1:20) %>% 
+  FindClusters(resolution = 0.8) %>% 
+  identity()
+
+#Visualize UMAP and Myoc across integrated data sets
+thm <- theme(aspect.ratio = 1)
+DimPlot(so, cols =CATALYST:::.cluster_cols, split.by = "project_id", raster = F)&thm
+FeaturePlot(so, "Myoc", split.by = "project_id", raster = F)&thm
+
