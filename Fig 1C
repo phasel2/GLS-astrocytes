@@ -5,6 +5,24 @@ library(ggplot2)
 library(harmony)
 library(CATALYST)
 
+#Astrocytes were extratced from the following data sets
+Source	GSE/data	PMID/DOI
+Castranio_et_al	GSE203424	36448627
+Endo_et_al	GSE198027	36378959
+Habib_et_al	GSE143758	32341542
+Hasel_et_al	GSE148611	34413515
+MacLean_et_al	GSE173524	35228715
+Matson_et_al	GSE172167	36163250
+Mifflin_et_al	GSE167332	33766915
+Milich_et_al	GSE162610	34132743
+Sadick_et_al	GSE167494	35381189
+Siletti_et_al	https://cellxgene.cziscience.com/collections/283d65eb-dd53-496d-adb7-7570c7caa443	https://www.biorxiv.org/content/10.1101/2022.10.12.511898v1
+Van_Hove_et_al	GSE128855	31061494
+Wheeler_et_al	GSE130119	32051591
+Ximerakis_et_al 	GSE129788	31551601
+Zamboni_et_al	GSE139842	32758425
+Zhou_et_al	GSE140511	31932797
+
 #Load and annotate seurat objects
 #Wheeler
 
@@ -58,12 +76,15 @@ so <- AddMetaData(object = so, metadata = 'Endo_et_al', col.name = 'project_id')
 
 saveRDS(so, file.path("/path/to/seurat_object", "Endo_WT_APP.rds"))
 
+#MacLean
+
 so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
 so <- AddMetaData(object = so, metadata = 'Spinal_Cord', col.name = 'region_id')
 so <- AddMetaData(object = so, metadata = 'MacLean_et_al', col.name = 'project_id')
 
 saveRDS(so, file.path("/path/to/seurat_object", "MacLean.rds"))
 
+#Mifflin
 
 so <- AddMetaData(object = so, metadata = 'DropSeq', col.name = 'tech_id')
 so <- AddMetaData(object = so, metadata = 'Spinal_Cord', col.name = 'region_id')
