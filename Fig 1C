@@ -7,6 +7,7 @@ library(CATALYST)
 
 #Load and annotate seurat objects
 #Wheeler
+
 so <- AddMetaData(object = so, metadata = 'DropSeq', col.name = 'tech_id')
 so <- AddMetaData(object = so, metadata = 'Brain_and_Spinal_cord', col.name = 'region_id')
 so <- AddMetaData(object = so, metadata = 'Wheeler_et_al', col.name = 'project_id')
@@ -16,6 +17,7 @@ so@assays$RNA <- so@assays$originalexp
 saveRDS(so, file.path("/path/to/seurat_object", "Wheeler.rds"))
 
 #Habib
+
 so <- AddMetaData(object = so, metadata = '10xGenomics', col.name = 'tech_id')
 so <- AddMetaData(object = so, metadata = 'Hippocampus', col.name = 'region_id')
 so <- AddMetaData(object = so, metadata = 'Habib_et_al', col.name = 'project_id')
