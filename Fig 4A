@@ -5,7 +5,7 @@ librry(dplyr)
 library(Seurat)
 
 #load seurat objects
-so<-readRDS(file.path("path/to/seurat_object","seurat_object.rds"))
+so<-readRDS("path/to/seurat_object.rds")
 
 #Identify MYOC+ astrocytes
 so <- SetIdent(so, cells = WhichCells(so, expression = MYOC > 0), value = "MYOC+")
