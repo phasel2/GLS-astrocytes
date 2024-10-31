@@ -7,11 +7,10 @@ tbl <- read.table(file = "GSM3687215_countTable_K23_enrichedSdm_wt.txt.gz", head
 
 #Create and cluster seurat object
 so <- CreateSeuratObject(tbl)
-so
 so <- SCTransform(so, assay = "RNA", verbose = FALSE)
 so <- RunPCA(so, verbose = FALSE)
 so <- FindNeighbors(so, dims = 1:30)
-so <- FindClusters(so, verbose = FALSE) #, resolution = 0.5) #change res
+so <- FindClusters(so, verbose = FALSE) #, resolution = 0.5) 
 so <- RunUMAP(so, dims = 1:30)
 
 #load gray matter and GLS astrocytes from Fig 5
