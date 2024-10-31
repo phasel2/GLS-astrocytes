@@ -26,4 +26,8 @@ df<-  mutate(df, Layer = case_when(str_detect(Area, "l1$") ~ 'L1',
                            str_detect(Area, "l6$") ~ 'L6'))
 
 #Create boxplot
-ggplot(df, aes(x=Value, y=Layer, fill=Gene)) +geom_boxplot(outlier.shape = NA)  &  scale_y_discrete(limits=c("L6", "L5", "L4", "L3", "L2", "L1"))&theme_bw()& scale_fill_brewer(palette = "Set2")
+ggplot(df, aes(x=Value, y=Layer, fill=Gene)) +
+	geom_boxplot(outlier.shape = NA) &  
+	scale_y_discrete(limits=c("L6", "L5", "L4", "L3", "L2", "L1"))&
+	theme_bw()& 
+	scale_fill_brewer(palette = "Set2")
