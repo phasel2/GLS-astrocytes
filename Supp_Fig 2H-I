@@ -1,0 +1,128 @@
+library(Seurat)
+library(ggplot2)
+library(dplyr)
+library(harmony)
+library(cowplot)
+library(CATALYST)
+library(patchwork)
+options(stringsAsFactors = F)
+
+#Reanalysis of leptomeninges and brain surface scRNA-seq [PMID: 38326613]
+
+#Laoad control data
+data.dir <- "path/to/Control"
+so.data <- Read10X(data.dir)
+
+so <- CreateSeuratObject(so.data)
+
+
+#Normalize and cluster cells
+so <- SCTransform(so, assay = "RNA")
+
+
+so <- RunPCA(so, verbose = F)
+so <- FindNeighbors(so, dims = 1:30, verbose = FALSE)
+so <- FindClusters(so, verbose = FALSE, resolution = 2)
+so <- RunUMAP(so, dims = 1:30, verbose = FALSE)
+
+
+#Merge seurat objects
+
+#To create a larger dataset merged the 'control', 'young' and 'young2' data from PMID: 38326613:
+
+options(future.globals.maxSize= 89128960000)
+#Young data
+data.dir1 <- "path/to/Young"
+
+so.data1 <- Read10X(data.dir1)
+so1 <- CreateSeuratObject(so.data1)
+
+so1 <- SCTransform(so1, assay = "RNA") 
+
+so1 <- RunPCA(so1, verbose = F)
+so1 <- FindNeighbors(so1, dims = 1:30, verbose = FALSE)
+so1 <- FindClusters(so1, verbose = FALSE, resolution = 0.8)
+so1 <- RunUMAP(so1, dims = 1:30, verbose = FALSE)
+
+#Young2 data
+data.dir2 <- "/path/to/Young2"
+
+so.data2 <- Read10X(data.dir2)
+so2 <- CreateSeuratObject(so.data2)
+
+so2 <- SCTransform(so2, assay = "RNA") 
+
+so2 <- RunPCA(so2, verbose = F)
+so2 <- FindNeighbors(so2, dims = 1:30, verbose = FALSE)
+so2 <- FindClusters(so2, verbose = FALSE, resolution = 0.8)
+so2 <- RunUMAP(so2, dims = 1:30, verbose = FALSE)
+
+#Add metadata
+so <- AddMetaData(so, metadata = "Control", "group_id")
+so1 <- AddMetaData(so1, metadata = "Young1", "group_id")
+so2 <- AddMetaData(so2, metadata = "Young2", "group_id")
+
+#Merge seurat objects
+merge <- merge(x=so, y=list(so1,so2))
+VariableFeatures(merge)<- c(VariableFeatures(so), VariableFeatures(so1), VariableFeatures(so2))
+
+#Rename seurat object back to 'so'
+so <- merge
+
+so <- SCTransform(so, assay = "RNA")
+
+so <- RunPCA(so, verbose = F)
+so <- FindNeighbors(so, dims = 1:30, verbose = FALSE)
+so <- FindClusters(so, verbose = FALSE, resolution = 0.8)
+so <- RunUMAP(so, dims = 1:30, verbose = FALSE)
+
+#Integrate merged seurat object across groups
+so <- so %>%
+  RunHarmony("group_id", plot_convergence = TRUE, assay.use = "SCT")
+
+options(repr.plot.height = 5, repr.plot.width = 12)
+p1 <- DimPlot(object = so, reduction = "harmony", pt.size = .1, group.by = "group_id")
+p2 <- VlnPlot(object = so, features = "harmony_1", group.by = "group_id", pt.size = .1)
+plot_grid(p1,p2)
+
+so <- so %>%
+  RunUMAP(reduction = "harmony", dims = 1:20) %>%
+  FindNeighbors(reduction = "harmony", dims = 1:20) %>%
+  FindClusters(resolution = 0.8) %>%
+  identity()
+
+#Initial visualization of clusters
+thm <- theme(aspect.ratio = 1)
+DimPlot(so, label = T, label.size = 2) + NoLegend()&thm
+
+#Rename cell types based on markers reported in PMID: 38326613 
+
+
+#Re-naming clusters
+new_names <- c("DBCs", "Leptomeningeal_FBs", "Astrocytes", "DBCs", "Leptomeningeal_FBs", "Leptomeningeal_FBs", "Cluster_6", "ABCs", "DBCs","Leptomeningeal_FBs", "aECs", "Immune_cells1", "Leptomeningeal_FBs", "vECs", "Astrocytes", "VSMCs", "DBCs", "Neurons", "Pericytes","DBCs", "Immune_cells2", "DBCs", "ABCs", "Oligodendrocytes")
+
+names(new_names) <- levels(so)
+so <- RenameIdents(object = so, new_names)
+
+#Check that clusters match identified cell types and levels are changed from: "0", "1", "2"... into: "DBCs", "Leptomeningeal_FBs", "Astrocytes" etc.
+DimPlot(so, label = TRUE) + NoLegend()
+levels(so) #should now match cell types
+
+#"Cluster_6" - was challenging to identify associated cell type based on known markers AND presented indicators of poor quality data (low reads & high DEGs for mitochondrial genes) - therefore decided to remove from analysis due to low quality
+
+#Removal of "Cluster_6"
+so_noC6 <- subset(x = so, idents = c("DBCs", "Leptomeningeal_FBs", "Astrocytes", "ABCs", "aECs", "Immune_cells1", "vECs", "VSMCs", "Neurons", "Pericytes", "Immune_cells2", "Oligodendrocytes"))
+
+#Check renaming has worked and Cluster_6 has been removed (subset out)
+DimPlot(so_noC6, label = TRUE) + NoLegend()
+
+#Rename 'so_noC6' back to 'so'
+so <- so_noC6
+
+#PLOTS####
+
+#Supp_Fig 2H
+DimPlot(so, cols =CATALYST:::.cluster_cols, label = T, label.size = 2) + NoLegend()
+
+#Supp_Fig 2I
+DotPlot(so, features = c("Myoc", "Gfap"))
