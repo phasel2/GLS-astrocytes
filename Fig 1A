@@ -5,7 +5,8 @@ library(SingleCellExperiment)
 library(Seurat)
 library(viridis)
 
-#Load Visium data
+#Load Visium data from GSE148611 and https://www.10xgenomics.com/resources/datasets.
+
 so<-Load10X_Spatial(data.dir = "path/to/spaceranger/outs/")
 
 #Normalize and cluster
