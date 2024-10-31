@@ -4,7 +4,7 @@ library(circlize)
 library(ComplexHeatmap)
 
 #load seurat objects from Fig 1C
-so<-readRDS(file.path("path/to/seurat_object.rds"))
+so<-readRDS("path/to/seurat_object.rds")
 
 #Identify Myoc+ astrocytes
 so <- SetIdent(so, cells = WhichCells(so, expression = Myoc > 0), value = "Myoc+")
