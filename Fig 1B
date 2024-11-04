@@ -86,7 +86,7 @@ O8 <- SCTransform(O8, assay = "RNA", verbose = FALSE)
 #Merge all SOs into one SO and add a cell tag
 so <- merge(x = Y1, y = list(Y2, Y3, Y4, Y5, Y6, Y7, Y8, O1, O2, O3, O4,O5,O6,O7,O8), add.cell.ids = c("Y1","Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "Y8", "O1", "O2", "O3", "O4","O5","O6","O7","O8"))
 
-#Make sure the default assays now SCT and no RNA
+#Set default assay to SCT
 DefaultAssay(so) <- "SCT"
 
 #Use SCT-calculated variable features from all samples
