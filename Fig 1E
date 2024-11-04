@@ -20,6 +20,6 @@ col_fun1 = colorRamp2(c(0,25,50,75, 100), c("#440154","#3b528b","#21918c","#5ec9
 circos.heatmap(mat, col = col_fun1, dend.side = "inside", 
                rownames.side = "outside", clustering.method = "single")
 
-lgd = Legend(title = "@expressed", col_fun = col_fun1)
+lgd = Legend(title = "%expressed", col_fun = col_fun1)
 grid.draw(lgd)
 circos.clear()
