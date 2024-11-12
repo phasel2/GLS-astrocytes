@@ -3,7 +3,7 @@
 Here you can find the code to recreate the figures from this manuscript currently under review.
 
 In the meantime, you can find the preprint 
-[here](https://www.biorxiv.org/content/10.1101/2023.04.06.535893v1). The figure panels currently don't overlap between the preptint and the manuscript under review.
+[here](https://www.biorxiv.org/content/10.1101/2023.04.06.535893v1). The figure panels currently don't overlap between the preprint and the manuscript under review.
 
 ## Main findings
 
