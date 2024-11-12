@@ -1,4 +1,7 @@
-<img src="https://github.com/user-attachments/assets/c4ecaa67-1a7c-4d8a-b499-f0bd502181a8" width="50" height="100"> 
+
+<img src="https://github.com/user-attachments/assets/5e8f3e61-b831-4138-8e9f-cad2ce109282" width="80" height="160"> 
+
+
 
 # Defining the molecular identity and morphology of _glia limitans     superficialis_ astrocytes in vertebrates
 
